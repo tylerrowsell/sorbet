@@ -1,0 +1,5 @@
+consumer_auth/identity_type.rb:4: `Project::ConsumerAuth` was previously defined as a `module` https://srb.help/4012
+     4 |class Project::ConsumerAuth
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    consumer_auth/__package.rb: Previous definition
+Errors: 1
