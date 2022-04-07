@@ -69,7 +69,7 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerInterface &
     }
     if (notifyAboutUntypedFile) {
         auto msg = fmt::format("Could not go to definition because the file is not at least `# typed: true`");
-        auto params = make_unique<ShowMessageParams>(MessageType::Info, msg);
+        auto params = make_unique<ShowMessageParams>(MessageType::Warning, msg);
         this->config.output->write(make_unique<LSPMessage>(
             make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
     }
