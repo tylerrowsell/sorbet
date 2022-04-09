@@ -719,6 +719,10 @@ public:
     std::vector<TypePtr> values;
     ShapeType(std::vector<TypePtr> keys, std::vector<TypePtr> values);
 
+    std::optional<size_t> indexForKey(const TypePtr &t) const;
+    std::optional<size_t> indexForKey(const LiteralType &lit) const;
+    std::optional<size_t> indexForKey(const LiteralIntegerType &lit) const;
+
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const {
         return show(gs, {});

@@ -421,8 +421,47 @@ void TupleType::_sanityCheck(const GlobalState &gs) const {
 }
 
 ShapeType::ShapeType(vector<TypePtr> keys, vector<TypePtr> values) : keys(move(keys)), values(move(values)) {
-    DEBUG_ONLY(for (auto &k : this->keys) { ENFORCE(isa_type<LiteralType>(k)); };);
+    DEBUG_ONLY(for (auto &k : this->keys) { ENFORCE(isa_type<LiteralType>(k) || isa_type<LiteralIntegerType>(k)); };);
     categoryCounterInc("types.allocated", "shapetype");
+}
+
+std::optional<size_t> ShapeType::indexForKey(const TypePtr &t) const {
+    if (isa_type<LiteralType>(t)) {
+        const auto &lit = cast_type_nonnull<LiteralType>(t);
+        return this->indexForKey(lit);
+    }
+    if (isa_type<LiteralIntegerType>(t)) {
+        auto &lit = cast_type_nonnull<LiteralIntegerType>(t);
+        return this->indexForKey(lit);
+    }
+    return false;
+}
+
+std::optional<size_t> ShapeType::indexForKey(const LiteralType &lit) const {
+    auto fnd = absl::c_find_if(keys, [&](auto &candidate) -> bool {
+            if (!isa_type<LiteralType>(candidate)) {
+                return false;
+            }
+            const auto &candlit = cast_type_nonnull<LiteralType>(candidate);
+            return candlit.equals(lit);
+        });
+    if (fnd == this->keys.end()) {
+        return std::nullopt;
+    }
+    return std::distance(this->keys.begin(), fnd);
+}
+std::optional<size_t> ShapeType::indexForKey(const LiteralIntegerType &lit) const {
+    auto fnd = absl::c_find_if(keys, [&](auto &candidate) -> bool {
+            if (!isa_type<LiteralIntegerType>(candidate)) {
+                return false;
+            }
+            const auto &candlit = cast_type_nonnull<LiteralIntegerType>(candidate);
+            return candlit.equals(lit);
+        });
+    if (fnd == this->keys.end()) {
+        return std::nullopt;
+    }
+    return std::distance(this->keys.begin(), fnd);
 }
 
 TypePtr ShapeType::underlying(const GlobalState &gs) const {

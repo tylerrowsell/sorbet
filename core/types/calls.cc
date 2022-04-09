@@ -3006,17 +3006,6 @@ public:
 
 namespace {
 
-optional<size_t> indexForKey(const ShapeType &shape, const LiteralType &argLit) {
-    auto fnd = absl::c_find_if(
-        shape.keys, [&argLit](auto &elemLit) { return argLit.equals(cast_type_nonnull<LiteralType>(elemLit)); });
-
-    if (fnd == shape.keys.end()) {
-        return nullopt;
-    } else {
-        return std::distance(shape.keys.begin(), fnd);
-    }
-}
-
 optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const NameRef key, const TypePtr expectedType) {
     if (!isa_type<ClassType>(expectedType)) {
         return nullopt;
@@ -3079,7 +3068,7 @@ public:
         }
 
         auto argLit = cast_type_nonnull<LiteralType>(args.args.front()->type);
-        if (auto idx = indexForKey(shape, argLit)) {
+        if (auto idx = shape.indexForKey(argLit)) {
             auto valueType = shape.values[*idx];
             auto expectedType = valueType;
             auto actualType = *args.args[1];
@@ -3151,7 +3140,12 @@ public:
         auto values = shape->values;
         auto addShapeEntry = [&keys, &values](const TypePtr &keyType, const LiteralType &key, const TypePtr &value) {
             auto fnd =
-                absl::c_find_if(keys, [&key](auto &lit) { return key.equals(cast_type_nonnull<LiteralType>(lit)); });
+                absl::c_find_if(keys, [&key](auto &lit) {
+                        if (!isa_type<LiteralType>(lit)) {
+                            return false;
+                        }
+                        return key.equals(cast_type_nonnull<LiteralType>(lit));
+                    });
             if (fnd == keys.end()) {
                 keys.emplace_back(keyType);
                 values.emplace_back(value);
@@ -3178,6 +3172,9 @@ public:
         // then kwsplat
         if (kwsplat != nullptr) {
             for (auto &keyType : kwsplat->keys) {
+                if (!isa_type<LiteralType>(keyType)) {
+                    return;
+                }
                 auto key = cast_type_nonnull<LiteralType>(keyType);
                 addShapeEntry(keyType, key, kwsplat->values[&keyType - &kwsplat->keys.front()]);
             }
