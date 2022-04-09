@@ -326,10 +326,6 @@ void sanityCheckProxyType(const GlobalState &gs, TypePtr underlying) {
 }
 } // namespace
 
-LiteralType::LiteralType(int64_t val) : value(val), literalKind(LiteralTypeKind::Integer) {
-    categoryCounterInc("types.allocated", "literaltype");
-}
-
 LiteralType::LiteralType(double val) : floatval(val), literalKind(LiteralTypeKind::Float) {
     categoryCounterInc("types.allocated", "literaltype");
 }
@@ -338,11 +334,6 @@ LiteralType::LiteralType(ClassOrModuleRef klass, NameRef val)
     : nameId(val.rawId()), literalKind(klass == Symbols::String() ? LiteralTypeKind::String : LiteralTypeKind::Symbol) {
     categoryCounterInc("types.allocated", "literaltype");
     ENFORCE(klass == Symbols::String() || klass == Symbols::Symbol());
-}
-
-int64_t LiteralType::asInteger() const {
-    ENFORCE_NO_TIMER(literalKind == LiteralTypeKind::Integer);
-    return value;
 }
 
 double LiteralType::asFloat() const {
@@ -362,8 +353,6 @@ core::NameRef LiteralType::unsafeAsName() const {
 
 TypePtr LiteralType::underlying(const GlobalState &gs) const {
     switch (literalKind) {
-        case LiteralTypeKind::Integer:
-            return Types::Integer();
         case LiteralTypeKind::Float:
             return Types::Float();
         case LiteralTypeKind::String:
@@ -372,6 +361,14 @@ TypePtr LiteralType::underlying(const GlobalState &gs) const {
             return Types::Symbol();
     }
     Exception::raise("should never be reached");
+}
+
+LiteralIntegerType::LiteralIntegerType(int64_t val) : value(val) {
+    categoryCounterInc("types.allocated", "literalintegertype");
+}
+
+TypePtr LiteralIntegerType::underlying(const GlobalState &gs) const {
+    return Types::Integer();
 }
 
 TupleType::TupleType(vector<TypePtr> elements) : elems(move(elements)) {
@@ -393,12 +390,18 @@ bool LiteralType::equals(const LiteralType &rhs) const {
     switch (this->literalKind) {
         case LiteralTypeKind::Float:
             return this->floatval == rhs.floatval;
-        case LiteralTypeKind::Integer:
-            return this->value == rhs.value;
         case LiteralTypeKind::Symbol:
         case LiteralTypeKind::String:
             return this->nameId == rhs.nameId;
     }
+}
+
+void LiteralIntegerType::_sanityCheck(const GlobalState &gs) const {
+    sanityCheckProxyType(gs, underlying(gs));
+}
+
+bool LiteralIntegerType::equals(const LiteralIntegerType &rhs) const {
+    return this->value == rhs.value;
 }
 
 OrType::OrType(const TypePtr &left, const TypePtr &right) : left(move(left)), right(move(right)) {
