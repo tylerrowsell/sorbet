@@ -393,8 +393,8 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                                     return;
                                 }
 
-                                auto &inserted = valueLubs.emplace_back(
-                                    lub(gs, h1.values[optind.value()], h2->values[i]));
+                                auto &inserted =
+                                    valueLubs.emplace_back(lub(gs, h1.values[optind.value()], h2->values[i]));
                                 differ1 = differ1 || inserted != h1.values[optind.value()];
                                 differ2 = differ2 || inserted != h2->values[i];
                             }
@@ -1242,8 +1242,8 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                             result = false;
                             return;
                         }
-                        if (!Types::isSubTypeUnderConstraint(gs, constr, h1.values[optind.value()],
-                                                             h2->values[i], mode)) {
+                        if (!Types::isSubTypeUnderConstraint(gs, constr, h1.values[optind.value()], h2->values[i],
+                                                             mode)) {
                             result = false;
                             return;
                         }

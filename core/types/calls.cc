@@ -1192,9 +1192,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 ++kwit;
 
                 auto arg = absl::c_find_if(hash->keys, [&](const TypePtr &litType) {
-                        if (!isa_type<LiteralType>(litType)) {
-                            return false;
-                        }
+                    if (!isa_type<LiteralType>(litType)) {
+                        return false;
+                    }
                     auto lit = cast_type_nonnull<LiteralType>(litType);
                     auto underlying = lit.underlying(gs);
                     return cast_type_nonnull<ClassType>(underlying).symbol == Symbols::Symbol() &&
@@ -2050,8 +2050,7 @@ public:
         keys.reserve(args.args.size() / 2);
         values.reserve(args.args.size() / 2);
         for (int i = 0; i < args.args.size(); i += 2) {
-            if (!isa_type<LiteralType>(args.args[i]->type) &&
-                !isa_type<LiteralIntegerType>(args.args[i]->type)) {
+            if (!isa_type<LiteralType>(args.args[i]->type) && !isa_type<LiteralIntegerType>(args.args[i]->type)) {
                 res.returnType = Types::hashOfUntyped();
                 return;
             }
@@ -2134,8 +2133,7 @@ public:
             return;
         }
         auto val = args.args.front()->type;
-        if (!(isa_type<LiteralIntegerType>(args.args[1]->type) &&
-              isa_type<LiteralIntegerType>(args.args[2]->type))) {
+        if (!(isa_type<LiteralIntegerType>(args.args[1]->type) && isa_type<LiteralIntegerType>(args.args[2]->type))) {
             res.returnType = Types::untypedUntracked();
             return;
         }
@@ -3143,13 +3141,12 @@ public:
         auto keys = shape->keys;
         auto values = shape->values;
         auto addShapeEntry = [&keys, &values](const TypePtr &keyType, const LiteralType &key, const TypePtr &value) {
-            auto fnd =
-                absl::c_find_if(keys, [&key](auto &lit) {
-                        if (!isa_type<LiteralType>(lit)) {
-                            return false;
-                        }
-                        return key.equals(cast_type_nonnull<LiteralType>(lit));
-                    });
+            auto fnd = absl::c_find_if(keys, [&key](auto &lit) {
+                if (!isa_type<LiteralType>(lit)) {
+                    return false;
+                }
+                return key.equals(cast_type_nonnull<LiteralType>(lit));
+            });
             if (fnd == keys.end()) {
                 keys.emplace_back(keyType);
                 values.emplace_back(value);
