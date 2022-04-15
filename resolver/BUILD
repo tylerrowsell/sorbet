@@ -12,6 +12,7 @@ cc_library(
     ),
     hdrs = [
         "resolver.h",
+        "PackageResolver.h",
     ],
     linkstatic = select({
         "//tools/config:linkshared": 0,

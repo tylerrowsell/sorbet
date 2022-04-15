@@ -43,6 +43,7 @@
 #include "parser/parser.h"
 #include "pipeline.h"
 #include "resolver/resolver.h"
+#include "resolver/PackageResolver.h"
 #include "rewriter/rewriter.h"
 
 using namespace std;
@@ -859,6 +860,18 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
 
         if (opts.stopAfterPhase != options::Phase::NAMER) {
             ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
+
+            // Should this run when we're stopping after the namer?
+            if (opts.stripePackages) {
+                Timer timeit(gs->tracer(), "package_resolver");
+                auto maybeResult = resolver::PackageResolver::run(*gs, std::move(what), workers);
+                if (!maybeResult.hasResult()) {
+                    return maybeResult;
+                }
+
+                what = move(maybeResult.result());
+            }
+
             {
                 Timer timeit(gs->tracer(), "resolving");
                 core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr

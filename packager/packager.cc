@@ -1928,11 +1928,11 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
                         name2Expr(core::Names::Constants::PackageTests()), {}, std::move(publicTestMapping));
 
     // Add wrapper modules to root of the tree
-    auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
-    rootKlass.rhs.emplace_back(move(packageNamespace));
-    rootKlass.rhs.emplace_back(move(testPackageNamespace));
-    rootKlass.rhs.emplace_back(move(publicMappingNamespace));
-    rootKlass.rhs.emplace_back(move(publicTestMappingNamespace));
+    // auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
+    // rootKlass.rhs.emplace_back(move(packageNamespace));
+    // rootKlass.rhs.emplace_back(move(testPackageNamespace));
+    // rootKlass.rhs.emplace_back(move(publicMappingNamespace));
+    // rootKlass.rhs.emplace_back(move(publicTestMappingNamespace));
 
     return file;
 }
