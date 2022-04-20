@@ -870,6 +870,10 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                 }
 
                 what = move(maybeResult.result());
+
+                for (auto &file : what) {
+                    opts.print.NameTreeRaw.fmt("# {}\n{}\n", file.file.data(*gs).path(), file.tree.showRaw(*gs));
+                }
             }
 
             {
